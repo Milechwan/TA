@@ -57,9 +57,9 @@ Then I should see the message "Campo de título é obrigatório. Nenhuma avalia�
 //And I press register button
 
 //Then I should stay in register evaluation page
-Then (~'^I should stay in register evaluation page$') { ->
+/*Then (~'^I should stay in register evaluation page$') { ->
 	at RegisterEvaluationPage
-}
+}*/
 
 /*
 Given the system has no evaluation entitled "Git evaluation" stored

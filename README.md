@@ -15,13 +15,13 @@ Run configurations:
 
 Grails:TA
 
-  run-app
+P/ rodar  -noreloading run-app
 
 Cucumber:TA
 
 (IntelliJ) Para rodar os testes, crie uma configuração do grails com a seguinte linha de comando: 
 
-test-app -Dgeb.env=chrome functional:cucumber
+P/ testar -noreloading test-app -Dgeb.env=chrome functional:cucumber
 
 -------------------------------------------------------------------------------------------------------------------
 

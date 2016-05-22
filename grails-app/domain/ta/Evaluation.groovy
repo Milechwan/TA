@@ -1,74 +1,30 @@
 package ta
 
 class Evaluation {
-	String title
-	static hasMany = [questions:Question]
-	//List<Question> questions;
-
-	static constraints = {
-        title blank: false, unique: true
+    String origin;
+    String value;
+    Date applicationDate;
+    Criterion criterion;
+    static constraints = {
+        origin inList :["Test","Mini-Test","Form","Final"], blank: false
+        value inList :["MA","MPA","MANA","--"], blank :false
+        criterion nullable : false
     }
 
-	public Evaluation(){
-		title = null
-		questions = new ArrayList<Question>()
-	}
-
-	public Question getQuestion(int index) { questions[index] }
-
-	public boolean equals(Evaluation ev) {
-		boolean equals = true;
-
-		if (this.title != ev.title){
-			equals = false
-		}
-
-		if (this.questions != null) {
-			if (ev.questions != null) {
-
-				if (this.questions.size() == ev.questions.size()){
-					int qSize = this.questions.size()
-					for (int i = 0; i < qSize; i += 1) {
-
-						if (!this.questions[i].question.equals(ev.questions[i].question)) {
-							equals = false
-						}
-
-						if (!this.questions[i].answer.equals(ev.questions[i].answer)) {
-							equals = false
-						}
-
-						if (this.questions[i].alternatives != null) {
-							if (ev.questions[i].alternatives != null) {
-
-								if (this.questions[i].alternatives.size() == ev.questions[i].alternatives.size()) {
-									int aSize = this.questions[i].alternatives.size()
-									for (int j = 0; j < qSize; j += 1) {
-
-										if (!this.questions[i].alternatives[j].equals(ev.questions[i].alternatives[j])){
-											equals = false
-										}
-									}
-								} else {
-									equals = false;
-								}
-
-							} else {
-								equals = false
-							}
-						} else {
-							equals = false
-						}
-					}
-				}
-
-			} else {
-				equals = false
-			}
-		} else {
-			equals = false
-		}
-
-		return equals
-	}
+    public boolean compatibleTo(Evaluation evaluationInstance){
+        if(this.origin.equals(evaluationInstance.getOrigin()) && this.value.equals(evaluationInstance.getValue()) && this.applicationDate.compareTo(evaluationInstance.getApplicationDate())==0 && this.criterion.getDescription().equals(evaluationInstance.getCriterion().getDescription()))
+        {
+            return true
+        }else {
+            return false
+        }
+    }
+    public boolean compatibleToNoValue(Evaluation evaluationInstance){
+        if(this.origin.equals(evaluationInstance.getOrigin()) && this.applicationDate.compareTo(evaluationInstance.getApplicationDate())==0 && this.criterion.getDescription().equals(evaluationInstance.getCriterion().getDescription()))
+        {
+            return true
+        }else {
+            return false
+        }
+    }
 }

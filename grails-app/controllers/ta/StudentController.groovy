@@ -1,5 +1,6 @@
 package ta
 
+import java.text.SimpleDateFormat
 
 import static org.springframework.http.HttpStatus.*
 import grails.transaction.Transactional
@@ -9,33 +10,77 @@ class StudentController {
 
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
 
-    def conceito = new HashMap<String, String>()
-
+    public static Date formattedDate(String dateInString){
+        def formatter = new SimpleDateFormat("dd/mm/yyyy");
+        Date date = formatter.parse(dateInString);
+        return date;
+    }
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)
-        respond Student.list(params), model: [studentInstanceCount: Student.count()]
+        respond Student.list(params), model:[studentInstanceCount: Student.count()]
+    }
+    public boolean addEvaluationsToAllStudents(String criterionName, Evaluation evaluationInstance){
+        for(Student student : Student.findAll()){
+            student.addEvaluation(evaluationInstance);
+            student.save flush : true
+        }
+        return true
     }
 
-    def show(Student studentInstance) {
-        respond studentInstance
+    public void addEvaluationToStudent(String login){
+        def student = Student.findByLogin(login);
+        def evaluationInstance = new Evaluation(params);
+        student.addEvaluation(evaluationInstance);
+        student.save flush : true
     }
 
-    def create() {
-        respond new Student(params)
+    public List<Evaluation> countStudentsEvaluated(String criterionName, String origin, String dateInString){
+        List<Evaluation> returningValue;
+        def evaluation = new Evaluation(origin,null,this.formattedDate(dateInString),new Criterion(criterionName));
+        def students = Student.findAll();
+        for(int i =0; i< students.size();i++){
+            returningValue.add(students.get(i).findEvaluationByCriterion(evaluation.getCriterion().getDescription()).findSpecificEvaluation(evaluation))
+        }
+        return returningValue;
     }
 
-    public Student createStudent() {
-        Student student = new Student(params)
-        student.afterCreateAddCriteria(EvaluationCriterion.findAll())
-        return student
+    public boolean checkEvaluationsAllStudents(String criterionName, String origin, String dateInString){
+       def evaluation = new Evaluation(origin,null,this.formattedDate(dateInString),new Criterion(criterionName));
+       List<Student> students = Student.findAll()
+       for(int i =0; i<students.size();i++){
+           def evCriterion  = students.get(i).findEvaluationByCriterion(criterionName);
+           if(evCriterion.findSpecificEvaluation(evaluation) != null){
+               return true;
+           }else{
+               return false
+           }
+       }
     }
 
-    /*public boolean saveStudent(Student student) {
-        if(Student.findByLogin(student.login) == null) {
+    public boolean updateEvaluation(String studentLogin, String newEvaluation, String criterionName, String evaluationOrigin){
+        Student updatedStudent = Student.findByLogin(studentLogin)
+        for(int i = 0; i < updatedStudent.criterionsAndEvaluations.size(); i++){
+            if(updatedStudent.criterionsAndEvaluations.get(i).getCriterion().getDescription().equals(criterionName)){
+                List<Evaluation> evaluationsInCriterion = updatedStudent.criterionsAndEvaluations.get(i).getEvaluations();
+                for(int j = 0; j < evaluationsInCriterion.size(); j++){
+                    if(evaluationsInCriterion.get(j).getOrigin().equals(evaluationOrigin)){
+                        evaluationsInCriterion.get(j).setValue(newEvaluation)
+                    }
+                }
+            }
+        }
+    }
+
+    public int countAllStudents(){
+        return Student.findAll().size();
+    }
+    /*public boolean saveStudent(Student student){
+        if(Student.findByLogin(student.login) ==null){
             student.save flush: true
             return true
+        }else{
+            return false
         }
-        return false
     }*/
 
     public boolean saveStudent() {
@@ -47,13 +92,36 @@ class StudentController {
         return false
     }
 
-    public void updateStudentEvaluationCriteria() {
-        for(Student student : Student.findAll()) {
-            for (EvaluationCriterion evCriterion : EvaluationCriterion.findAll()) {
-                student.addCriterion(evCriterion)
-                student.save flush: true
-            }
+    public void addEvaluation(String studentLogin, String criterionName, String evaluationOrigin){
+
+        Student student = Student.findByLogin(studentLogin)
+        student.addEvaluation(null, criterionName, evaluationOrigin)
+        student.save flush : true
+    }
+
+    /*def addCriterion(Criterion criterionInstance){
+        for(Student student : Student.findAll()){
+            student.criterions.add(criterionInstance);
+            save(student)
         }
+    }*/
+
+    public Student createStudent(){
+        return new Student(params)
+    }
+
+    public Student createAndSaveStudent(){
+        Student student = new Student(params)
+        saveStudent(student)
+        return student
+    }
+
+    def show(Student studentInstance) {
+        respond studentInstance
+    }
+
+    def create() {
+        respond new Student(params)
     }
 
     @Transactional
@@ -64,16 +132,11 @@ class StudentController {
         }
 
         if (studentInstance.hasErrors()) {
-            respond studentInstance.errors, view: 'create'
+            respond studentInstance.errors, view:'create'
             return
         }
 
-        ////////////////////////////////
-        studentInstance.afterCreateAddCriteria(EvaluationCriterion.findAll())
-        ////////////////////////////////
-
-        studentInstance.save flush: true
-
+        studentInstance.save flush:true
 
         request.withFormat {
             form multipartForm {
@@ -96,31 +159,19 @@ class StudentController {
         }
 
         if (studentInstance.hasErrors()) {
-            respond studentInstance.errors, view: 'edit'
+            respond studentInstance.errors, view:'edit'
             return
         }
 
-        studentInstance.save flush: true
+        studentInstance.save flush:true
 
         request.withFormat {
             form multipartForm {
-                flash.message = message(code: 'default.updated.message', args: [message(code: 'Student.label', default: 'Student'), studentInstance.id])
+                flash.message = message(code: 'default.updated.message', args: [message(code: 'student.label', default: 'Student'), studentInstance.id])
                 redirect studentInstance
             }
-            '*' { respond studentInstance, [status: OK] }
+            '*'{ respond studentInstance, [status: OK] }
         }
-    }
-
-    @Transactional
-    def updateConcepts(String studentCriterion, String concept) {
-        System.out.println(studentCriterion)
-        System.out.println(params.get("concept"))
-
-        String[] aux = studentCriterion.split(" / ")
-
-        Student student = Student.findByLogin(aux[0])
-        student.evaluations.put(aux[1], concept)
-        student.save flush: true
     }
 
     @Transactional
@@ -131,14 +182,14 @@ class StudentController {
             return
         }
 
-        studentInstance.delete flush: true
+        studentInstance.delete flush:true
 
         request.withFormat {
             form multipartForm {
-                flash.message = message(code: 'default.deleted.message', args: [message(code: 'Student.label', default: 'Student'), studentInstance.id])
-                redirect action: "index", method: "GET"
+                flash.message = message(code: 'default.deleted.message', args: [message(code: 'student.label', default: 'Student'), studentInstance.id])
+                redirect action:"index", method:"GET"
             }
-            '*' { render status: NO_CONTENT }
+            '*'{ render status: NO_CONTENT }
         }
     }
 
@@ -148,7 +199,7 @@ class StudentController {
                 flash.message = message(code: 'default.not.found.message', args: [message(code: 'student.label', default: 'Student'), params.id])
                 redirect action: "index", method: "GET"
             }
-            '*' { render status: NOT_FOUND }
+            '*'{ render status: NOT_FOUND }
         }
     }
 }

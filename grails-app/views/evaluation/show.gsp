@@ -23,22 +23,29 @@
 			</g:if>
 			<ol class="property-list evaluation">
 			
-				<g:if test="${evaluationInstance?.title}">
+				<g:if test="${evaluationInstance?.origin}">
 				<li class="fieldcontain">
-					<span id="title-label" class="property-label"><g:message code="evaluation.title.label" default="Title" /></span>
+					<span id="origin-label" class="property-label"><g:message code="evaluation.origin.label" default="Origin" /></span>
 					
-						<span class="property-value" aria-labelledby="title-label"><g:fieldValue bean="${evaluationInstance}" field="title"/></span>
+						<span class="property-value" aria-labelledby="origin-label"><g:fieldValue bean="${evaluationInstance}" field="origin"/></span>
 					
 				</li>
 				</g:if>
 			
-				<g:if test="${evaluationInstance?.questions}">
+				<g:if test="${evaluationInstance?.value}">
 				<li class="fieldcontain">
-					<span id="questions-label" class="property-label"><g:message code="evaluation.questions.label" default="Questions" /></span>
+					<span id="value-label" class="property-label"><g:message code="evaluation.value.label" default="Value" /></span>
 					
-						<g:each in="${evaluationInstance.questions}" var="q">
-						<span class="property-value" aria-labelledby="questions-label"><g:link controller="question" action="show" id="${q.id}">${q?.encodeAsHTML()}</g:link></span>
-						</g:each>
+						<span class="property-value" aria-labelledby="value-label"><g:fieldValue bean="${evaluationInstance}" field="value"/></span>
+					
+				</li>
+				</g:if>
+			
+				<g:if test="${evaluationInstance?.applicationDate}">
+				<li class="fieldcontain">
+					<span id="applicationDate-label" class="property-label"><g:message code="evaluation.applicationDate.label" default="Application Date" /></span>
+					
+						<span class="property-value" aria-labelledby="applicationDate-label"><g:formatDate date="${evaluationInstance?.applicationDate}" /></span>
 					
 				</li>
 				</g:if>

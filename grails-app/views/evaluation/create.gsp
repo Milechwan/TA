@@ -25,13 +25,6 @@
 				</g:eachError>
 			</ul>
 			</g:hasErrors>
-
-			<div id="questionfields">
-
-			</div>
-
-			<button onclick="newQuestion();">New Question</button>
-
 			<g:form url="[resource:evaluationInstance, action:'save']" >
 				<fieldset class="form">
 					<g:render template="form"/>
@@ -41,19 +34,5 @@
 				</fieldset>
 			</g:form>
 		</div>
-
-		<script type="text/javascript">
-			var index = 0;
-
-			function newQuestion(){
-				console.log('hello');
-				document.getElementById('questionfields').innerHTML += "<div class=\"fieldcontain \${hasErrors(bean: questionInstance, field: 'question', 'error')} required\">"
-				document.getElementById('questionfields').innerHTML += "<label for=\"question\">"
-				document.getElementById('questionfields').innerHTML += "<span class=\"required-indicator\">*</span>"
-				document.getElementById('questionfields').innerHTML += "</label>"
-				document.getElementById('questionfields').innerHTML += "</div>"
-
-			}
-		</script>
 	</body>
 </html>

@@ -1,11 +1,11 @@
 Feature: Add Student
   As a professor
   I want to register students in the system
-  So
+  So I can evaluate the students with respect to various criteria
 
 #Cenário Controler
-  Scenario: Register a new students
-    Given the student "Roberto Alves" with login "ra" is not register in the system
+  Scenario: Register a new student
+    Given the student "Roberto Alves" with login "ra" is not registered in the system
     When I register "Roberto Alves" with login "ra"
     Then the student "Roberto Alves" with login "ra" is registered in the system
 
@@ -17,7 +17,7 @@ Feature: Add Student
 
 #Cenário Controler
   Scenario: Register a student twice
-    Given the student "Roberto Alves" with login "ra" is register in the system
+    Given the student "Roberto Alves" with login "ra" is registered in the system
     When I register "Roberto Alves" with login "ra"
     Then the system does not register "Roberto Alves" with login "ra"
 
